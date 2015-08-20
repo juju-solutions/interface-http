@@ -1,6 +1,7 @@
-from charmhelpers.core.reactive import hook
-from charmhelpers.core.reactive import RelationBase
-from charmhelpers.core.reactive import scopes
+from charmhelpers.core import hookenv
+from charms.reactive import hook
+from charms.reactive import RelationBase
+from charms.reactive import scopes
 
 
 class HttpProvides(RelationBase):
@@ -14,9 +15,9 @@ class HttpProvides(RelationBase):
     def broken(self):
         self.remove_state('{relation_name}.available')
 
-    def configure(self, hostname, port):
+    def configure(self, port):
         relation_info = {
-            'hostname': hostname,
+            'hostname': hookenv.unit_get('private-address'),
             'port': port,
         }
         self.set_remote(**relation_info)
