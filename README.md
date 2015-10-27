@@ -41,4 +41,5 @@ def update_reverse_proxy_config(reverseproxy):
     for service_name, hosts in reverseproxy.services().items():
         for host, port in hosts:
             hookenv.log('{} has a unit {}:{}'.format(service_name, host, port))
+    remove_state('reverseproxy.changed')
 ```
