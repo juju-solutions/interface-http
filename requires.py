@@ -18,12 +18,38 @@ class HttpRequires(RelationBase):
             self.set_state('{relation_name}.changed')
 
     def services(self):
-        services_data = {}
+        """
+        Returns a list of available HTTP services and their associated hosts
+        and ports.
+
+        The return value is a list of dicts of the following form::
+
+            [
+                {
+                    'service_name': name_of_service,
+                    'hosts': [
+                        {
+                            'hostname': address_of_host,
+                            'port': port_for_host,
+                        },
+                        # ...
+                    ],
+                },
+                # ...
+            ]
+        """
+        services = {}
         for conv in self.conversations():
-            unit = conv.scope
-            service = unit.split('/')[0]
+            service_name = conv.scope.split('/')[0]
+            service = services.setdefault(service_name, {
+                'service_name': service_name,
+                'hosts': [],
+            })
             host = conv.get_remote('hostname') or conv.get_remove('private-address')
             port = conv.get_remote('port')
             if host and port:
-                services_data.setdefault(service, []).append((host, port))
-        return services_data
+                service['hosts'].append({
+                    'hostname': host,
+                    'port': port,
+                })
+        return [s for s in services.values() if s['hosts']]

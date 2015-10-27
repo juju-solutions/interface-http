@@ -38,8 +38,11 @@ A trivial example of handling this interface would be:
 ```python
 @when('reverseproxy.changed')
 def update_reverse_proxy_config(reverseproxy):
-    for service_name, hosts in reverseproxy.services().items():
-        for host, port in hosts:
-            hookenv.log('{} has a unit {}:{}'.format(service_name, host, port))
+    for service in reverseproxy.services():
+        for host in hosts:
+            hookenv.log('{} has a unit {}:{}'.format(
+                services['service_name'],
+                host['hostname'],
+                host['port']))
     remove_state('reverseproxy.changed')
 ```
