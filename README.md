@@ -30,8 +30,24 @@ at least one HTTP server connected, and the latter indicating that there is at
 least one HTTP server connected and that the connection info has changed.  (The
 changed state should be removed after being handled.)
 
-The `services()` method will return a mapping of attached HTTP servers to a
-list of their hosts and ports.
+The `services()` method returns a list of available HTTP services and their
+associated hosts and ports.
+
+The return value is a list of dicts of the following form::
+
+```json
+[
+    {
+        'service_name': name_of_service,
+        'hosts': [
+            {
+                'hostname': address_of_host,
+                'port': port_for_host,
+            },
+        ],
+    },
+]
+```
 
 A trivial example of handling this interface would be:
 
