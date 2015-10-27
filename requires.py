@@ -1,7 +1,6 @@
 from charms.reactive import hook
 from charms.reactive import RelationBase
 from charms.reactive import scopes
-from charms.reactive.helpers import data_changed
 
 
 class HttpRequires(RelationBase):
@@ -14,8 +13,6 @@ class HttpRequires(RelationBase):
             self.set_state('{relation_name}.available')
         else:
             self.remove_state('{relation_name}.available')
-        if data_changed('{}.services'.format(self.relation_name), services):
-            self.set_state('{relation_name}.changed')
 
     def services(self):
         """
