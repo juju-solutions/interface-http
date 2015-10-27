@@ -39,7 +39,7 @@ A trivial example of handling this interface would be:
 @when('reverseproxy.changed')
 def update_reverse_proxy_config(reverseproxy):
     for service in reverseproxy.services():
-        for host in hosts:
+        for host in service['hosts']:
             hookenv.log('{} has a unit {}:{}'.format(
                 services['service_name'],
                 host['hostname'],
