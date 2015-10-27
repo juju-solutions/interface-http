@@ -8,12 +8,16 @@ class HttpRequires(RelationBase):
 
     @hook('{requires:http}-relation-{joined,changed}')
     def changed(self):
-        if self.services():
-            self.set_state('{relation_name}.available')
+        conv = self.conversation()
+        if conv.get_remote('port'):
+            # this unit's conversation has a port, so
+            # it is part of the set of available units
+            conv.set_state('{relation_name}.available')
 
     @hook('{requires:http}-relation-{departed,broken}')
     def broken(self):
-        self.remove_state('{relation_name}.available')
+        conv = self.conversation()
+        conv.remove_state('{relation_name}.available')
 
     def services(self):
         """
