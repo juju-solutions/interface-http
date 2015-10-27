@@ -33,7 +33,7 @@ changed state should be removed after being handled.)
 The `services()` method returns a list of available HTTP services and their
 associated hosts and ports.
 
-The return value is a list of dicts of the following form::
+The return value is a list of dicts of the following form:
 
 ```python
 [
