@@ -35,7 +35,7 @@ associated hosts and ports.
 
 The return value is a list of dicts of the following form::
 
-```json
+```python
 [
     {
         'service_name': name_of_service,
@@ -44,8 +44,10 @@ The return value is a list of dicts of the following form::
                 'hostname': address_of_host,
                 'port': port_for_host,
             },
+            # ...
         ],
     },
+    # ...
 ]
 ```
 
