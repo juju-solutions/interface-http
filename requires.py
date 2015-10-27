@@ -14,7 +14,7 @@ class HttpRequires(RelationBase):
             self.set_state('{relation_name}.available')
         else:
             self.remove_state('{relation_name}.available')
-        if data_changed(self.relation_name, services):
+        if data_changed('{}.services'.format(self.relation_name), services):
             self.set_state('{relation_name}.changed')
 
     def services(self):
