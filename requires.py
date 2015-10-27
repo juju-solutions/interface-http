@@ -6,13 +6,14 @@ from charms.reactive import scopes
 class HttpRequires(RelationBase):
     scope = scopes.UNIT
 
-    @hook('{requires:http}-relation-{joined,changed,departed,broken}')
+    @hook('{requires:http}-relation-{joined,changed}')
     def changed(self):
-        services = self.services()
-        if services:
+        if self.services():
             self.set_state('{relation_name}.available')
-        else:
-            self.remove_state('{relation_name}.available')
+
+    @hook('{requires:http}-relation-{departed,broken}')
+    def broken(self):
+        self.remove_state('{relation_name}.available')
 
     def services(self):
         """
