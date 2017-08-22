@@ -5,7 +5,7 @@ from charms.reactive import scopes
 
 
 class HttpProvides(RelationBase):
-    scope = scopes.GLOBAL
+    scope = scopes.UNIT
 
     @hook('{provides:http}-relation-{joined,changed}')
     def changed(self):
@@ -25,4 +25,5 @@ class HttpProvides(RelationBase):
             'private-address': private_address,
             'port': port,
         }
-        self.set_remote(**relation_info)
+        for conv in self.conversations():
+            conv.set_remote(**relation_info)
