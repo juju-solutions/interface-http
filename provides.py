@@ -11,9 +11,11 @@ class HttpProvides(RelationBase):
     def changed(self):
         self.set_state('{relation_name}.available')
 
-    @hook('{provides:http}-relation-{broken,departed}')
-    def broken(self):
-        self.remove_state('{relation_name}.available')
+    @hook('{provides:http}-relation-departed')
+    def departed(self):
+        if len(self.conversation().units) == 1:
+            # this is the last departing unit
+            self.remove_state('{relation_name}.available')
 
     def configure(self, port, private_address=None, hostname=None):
         if not hostname:
