@@ -1,23 +1,18 @@
-from charms.reactive import hook
-from charms.reactive import RelationBase
-from charms.reactive import scopes
+from charms.reactive import when, when_not
+from charms.reactive import set_flag, clear_flag
+from charms.reactive import Endpoint
 
 
-class HttpRequires(RelationBase):
-    scope = scopes.UNIT
+class HttpRequires(Endpoint):
 
-    @hook('{requires:http}-relation-{joined,changed}')
+    @when('endpoint.{endpoint_name}.changed')
     def changed(self):
-        conv = self.conversation()
-        if conv.get_remote('port'):
-            # this unit's conversation has a port, so
-            # it is part of the set of available units
-            conv.set_state('{relation_name}.available')
+        if any(unit.received['port'] for unit in self.all_units):
+            set_flag(self.expand_name('{endpoint_name}.available'))
 
-    @hook('{requires:http}-relation-{departed,broken}')
+    @when_not('endpoint.{endpoint_name}.joined')
     def broken(self):
-        conv = self.conversation()
-        conv.remove_state('{relation_name}.available')
+        clear_flag(self.expand_name('{endpoint_name}.available'))
 
     def services(self):
         """
