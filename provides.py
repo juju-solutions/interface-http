@@ -17,11 +17,21 @@ class HttpProvides(RelationBase):
             # this is the last departing unit
             self.remove_state('{relation_name}.available')
 
+    def get_ingress_address(self):
+        network_info = hookenv.network_get(self.relation_name)
+        if 'ingress-addresses' in network_info:
+            # just grab the first one for now, maybe be more robust here?
+            return network_info['ingress-addresses'][0]
+        else:
+            # if they don't have ingress-addresses they are running a juju that
+            # doesn't support spaces, so just return the private address
+            return hookenv.unit_get('private-address')
+
     def configure(self, port, private_address=None, hostname=None):
         if not hostname:
-            hostname = hookenv.unit_get('private-address')
+            hostname = self.get_ingress_address()
         if not private_address:
-            private_address = hookenv.unit_get('private-address')
+            private_address = self.get_ingress_address()
         relation_info = {
             'hostname': hostname,
             'private-address': private_address,
