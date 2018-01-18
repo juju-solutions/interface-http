@@ -18,8 +18,12 @@ class HttpProvides(RelationBase):
             self.remove_state('{relation_name}.available')
 
     def get_ingress_address(self):
-        network_info = hookenv.network_get(self.relation_name)
-        if 'ingress-addresses' in network_info:
+        try:
+            network_info = hookenv.network_get(self.relation_name)
+        except NotImplementedError:
+            network_info = []
+
+        if network_info and 'ingress-addresses' in network_info:
             # just grab the first one for now, maybe be more robust here?
             return network_info['ingress-addresses'][0]
         else:
