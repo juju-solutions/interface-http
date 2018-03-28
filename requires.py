@@ -7,7 +7,7 @@ class HttpRequires(Endpoint):
 
     @when('endpoint.{endpoint_name}.changed')
     def changed(self):
-        if any(unit.received['port'] for unit in self.all_units):
+        if any(unit.received['port'] for unit in self.all_joined_units):
             set_flag(self.expand_name('{endpoint_name}.available'))
 
     @when_not('endpoint.{endpoint_name}.joined')
@@ -27,6 +27,7 @@ class HttpRequires(Endpoint):
                     'hosts': [
                         {
                             'hostname': address_of_host,
+                            'private-address': private_address_of_host,
                             'port': port_for_host,
                         },
                         # ...
@@ -36,18 +37,19 @@ class HttpRequires(Endpoint):
             ]
         """
         services = {}
-        for conv in self.conversations():
-            service_name = conv.scope.split('/')[0]
+        for relation in self.relations:
+            service_name = relation.application_name
             service = services.setdefault(service_name, {
                 'service_name': service_name,
                 'hosts': [],
             })
-            host = conv.get_remote('hostname') or \
-                conv.get_remote('private-address')
-            port = conv.get_remote('port')
+            private_address = relation.joined_units['private-address']
+            host = relation.joined_units['hostname'] or private_address
+            port = relation.joined_units['port']
             if host and port:
                 service['hosts'].append({
                     'hostname': host,
+                    'private-address': private_address,
                     'port': port,
                 })
         return [s for s in services.values() if s['hosts']]
