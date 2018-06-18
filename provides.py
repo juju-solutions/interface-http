@@ -15,18 +15,9 @@ class HttpProvides(Endpoint):
         clear_flag(self.expand_name('{endpoint_name}.available'))
 
     def get_ingress_address(self):
-        try:
-            network_info = hookenv.network_get(self.relation_name)
-        except NotImplementedError:
-            network_info = []
-
-        if network_info and 'ingress-addresses' in network_info:
-            # just grab the first one for now, maybe be more robust here?
-            return network_info['ingress-addresses'][0]
-        else:
-            # if they don't have ingress-addresses they are running a juju that
-            # doesn't support spaces, so just return the private address
-            return hookenv.unit_get('private-address')
+        # just grab the first one for now, maybe be more robust here?
+        rel_id = self.relations[0].relation_id
+        return hookenv.ingress_address(rel_id, hookenv.local_unit())
 
     def configure(self, port, private_address=None, hostname=None):
         if not hostname:
