@@ -14,19 +14,20 @@ class HttpProvides(Endpoint):
     def broken(self):
         clear_flag(self.expand_name('{endpoint_name}.available'))
 
-    def get_ingress_address(self):
-        # just grab the first one for now, maybe be more robust here?
-        rel_id = self.relations[0].relation_id
+    def get_ingress_address(self, rel_id=None):
+
+        # If no rel_id is provided, we fallback to the first one
+        if rel_id is None:
+            rel_id = self.relations[0].relation_id
+
         return hookenv.ingress_address(rel_id, hookenv.local_unit())
 
     def configure(self, port, private_address=None, hostname=None):
-        if not hostname:
-            hostname = self.get_ingress_address()
-        if not private_address:
-            private_address = self.get_ingress_address()
+
         for relation in self.relations:
+
             relation.to_publish.update({
-                'hostname': hostname,
-                'private-address': private_address,
+                'hostname': hostname or self.get_ingress_address(rel_id=relation.relation_id),
+                'private-address': private_address or self.get_ingress_address(rel_id=relation.relation_id),
                 'port': port,
             })
