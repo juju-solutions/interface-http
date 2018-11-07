@@ -28,3 +28,14 @@ class HttpProvides(Endpoint):
                 'private-address': private_address or ingress_address,
                 'port': port,
             })
+
+    def set_remote(self, **kwargs):
+        # NB: This method provides backwards compatibility for charms that
+        # called RelationBase.set_remote. Most commonly, this was done by
+        # charms that needed to pass reverse proxy stanzas to http proxies.
+        # This type of interaction with base relation classes is discouraged,
+        # and should be handled with logic encapsulated in appropriate
+        # interfaces. Eventually, this method will be deprecated in favor of
+        # that behavior.
+        for relation in self.relations:
+            relation.to_publish_raw.update(kwargs)
