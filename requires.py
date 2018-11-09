@@ -7,7 +7,7 @@ class HttpRequires(Endpoint):
 
     @when('endpoint.{endpoint_name}.changed')
     def changed(self):
-        if any(unit.received['port'] for unit in self.all_joined_units):
+        if any(unit.received_raw['port'] for unit in self.all_joined_units):
             set_flag(self.expand_name('{endpoint_name}.available'))
 
     @when_not('endpoint.{endpoint_name}.joined')
@@ -38,7 +38,7 @@ class HttpRequires(Endpoint):
         """
         services = {}
         for relation in self.relations:
-            data = relation.joined_units.received
+            data = relation.joined_units.received_raw
             service_name = relation.application_name
             service = services.setdefault(service_name, {
                 'service_name': service_name,
