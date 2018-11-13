@@ -38,19 +38,20 @@ class HttpRequires(Endpoint):
         """
         services = {}
         for relation in self.relations:
-            data = relation.joined_units.received_raw
             service_name = relation.application_name
             service = services.setdefault(service_name, {
                 'service_name': service_name,
                 'hosts': [],
             })
-            private_address = data['private-address']
-            host = data['hostname'] or private_address
-            port = data['port']
-            if host and port:
-                service['hosts'].append({
-                    'hostname': host,
-                    'private-address': private_address,
-                    'port': port,
-                })
+            for unit in relation.joined_units:
+                data = unit.received_raw
+                private_address = data['private-address']
+                host = data['hostname'] or private_address
+                port = data['port']
+                if host and port:
+                    service['hosts'].append({
+                        'hostname': host,
+                        'private-address': private_address,
+                        'port': port,
+                    })
         return [s for s in services.values() if s['hosts']]
