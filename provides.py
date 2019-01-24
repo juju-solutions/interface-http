@@ -1,3 +1,5 @@
+import json
+
 from charmhelpers.core import hookenv
 from charms.reactive import when, when_not
 from charms.reactive import set_flag, clear_flag
@@ -21,13 +23,37 @@ class HttpProvides(Endpoint):
         return hookenv.ingress_address(rel_id, hookenv.local_unit())
 
     def configure(self, port, private_address=None, hostname=None):
+        ''' configure the address(es). private_address and hostname can
+        be None, a single string address/hostname, or a list of addresses
+        and hostnames. Note that if a list is passed, it is assumed both
+        private_address and hostname are either lists or None '''
         for relation in self.relations:
             ingress_address = self.get_ingress_address(relation.relation_id)
-            relation.to_publish_raw.update({
-                'hostname': hostname or ingress_address,
-                'private-address': private_address or ingress_address,
-                'port': port,
-            })
+            if type(private_address) is list or type(hostname) is list:
+                # build 3 lists to zip together that are the same length
+                length = max(len(private_address), len(hostname))
+                p = [port] * length
+                a = private_address + [ingress_address] *\
+                    (length - len(private_address))
+                h = hostname + [ingress_address] * (length - len(hostname))
+                zipped_list = zip(p, a, h)
+                # now build an array of dictionaries from that in the desired
+                # format for the interface
+                data_list = [{'hostname': h, 'port': p, 'private-address': a}
+                             for p, a, h in zipped_list]
+                # for backwards compatibility, we just send a single entry
+                # and have an array of dictionaries in a field of that
+                # entry for the other entries.
+                data = data_list.pop(0)
+                data['extended_data'] = json.dumps(data_list)
+
+                relation.to_publish_raw.update(data)
+            else:
+                relation.to_publish_raw.update({
+                    'hostname': hostname or ingress_address,
+                    'private-address': private_address or ingress_address,
+                    'port': port,
+                })
 
     def set_remote(self, **kwargs):
         # NB: This method provides backwards compatibility for charms that
