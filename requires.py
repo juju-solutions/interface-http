@@ -41,18 +41,13 @@ class HttpRequires(Endpoint):
         def build_service_host(data):
             private_address = data['private-address']
             host = data['hostname'] or private_address
-            port = data['port']
-            if host and port:
-                return {
-                    'hostname': host,
-                    'private-address': private_address,
-                    'port': port,
-                }
+            if host and data['port']:
+                return (host, private_address, data['port'])
             else:
                 return None
 
         services = {}
-        dup_list = {}
+        host_set = set()
         for relation in self.relations:
             service_name = relation.application_name
             service = services.setdefault(service_name, {
@@ -63,26 +58,17 @@ class HttpRequires(Endpoint):
                 data = unit.received_raw
                 host = build_service_host(data)
                 if host:
-                    # remove duplicates
-                    key = '{}.{}.{}'.format(host['hostname'],
-                                            host['private-address'],
-                                            host['port'])
-                    if key not in dup_list:
-                        dup_list[key] = 1
-                        service['hosts'].append(host)
+                    host_set.add(host)
 
                 # if we have extended data, add it
                 if 'extended_data' in data:
                     for ed in json.loads(data['extended_data']):
                         host = build_service_host(ed)
                         if host:
-                            # remove duplicates
-                            key = '{}.{}.{}'.format(host['hostname'],
-                                                    host['private-address'],
-                                                    host['port'])
-                            if key not in dup_list:
-                                dup_list[key] = 1
-                                service['hosts'].append(host)
+                            host_set.add(host)
+
+        service['hosts'] = [{'hostname': h, 'private-address': pa, 'port': p}
+                            for h, pa, p in host_set]
 
         ret = [s for s in services.values() if s['hosts']]
         return ret
