@@ -1,3 +1,5 @@
+import json
+
 from charms.reactive import when, when_not
 from charms.reactive import set_flag, clear_flag
 from charms.reactive import Endpoint
@@ -36,7 +38,16 @@ class HttpRequires(Endpoint):
                 # ...
             ]
         """
+        def build_service_host(data):
+            private_address = data['private-address']
+            host = data['hostname'] or private_address
+            if host and data['port']:
+                return (host, private_address, data['port'])
+            else:
+                return None
+
         services = {}
+        host_set = set()
         for relation in self.relations:
             service_name = relation.application_name
             service = services.setdefault(service_name, {
@@ -45,13 +56,19 @@ class HttpRequires(Endpoint):
             })
             for unit in relation.joined_units:
                 data = unit.received_raw
-                private_address = data['private-address']
-                host = data['hostname'] or private_address
-                port = data['port']
-                if host and port:
-                    service['hosts'].append({
-                        'hostname': host,
-                        'private-address': private_address,
-                        'port': port,
-                    })
-        return [s for s in services.values() if s['hosts']]
+                host = build_service_host(data)
+                if host:
+                    host_set.add(host)
+
+                # if we have extended data, add it
+                if 'extended_data' in data:
+                    for ed in json.loads(data['extended_data']):
+                        host = build_service_host(ed)
+                        if host:
+                            host_set.add(host)
+
+        service['hosts'] = [{'hostname': h, 'private-address': pa, 'port': p}
+                            for h, pa, p in host_set]
+
+        ret = [s for s in services.values() if s['hosts']]
+        return ret
