@@ -67,8 +67,10 @@ class HttpRequires(Endpoint):
                         if host:
                             host_set.add(host)
 
-        service['hosts'] = [{'hostname': h, 'private-address': pa, 'port': p}
-                            for h, pa, p in host_set]
+            service['hosts'] = [
+                {'hostname': h, 'private-address': pa, 'port': p}
+                for h, pa, p in host_set
+            ]
 
         ret = [s for s in services.values() if s['hosts']]
         return ret
