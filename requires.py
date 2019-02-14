@@ -47,13 +47,13 @@ class HttpRequires(Endpoint):
                 return None
 
         services = {}
-        host_set = set()
         for relation in self.relations:
             service_name = relation.application_name
             service = services.setdefault(service_name, {
                 'service_name': service_name,
                 'hosts': [],
             })
+            host_set = set()
             for unit in relation.joined_units:
                 data = unit.received_raw
                 host = build_service_host(data)
@@ -67,8 +67,10 @@ class HttpRequires(Endpoint):
                         if host:
                             host_set.add(host)
 
-        service['hosts'] = [{'hostname': h, 'private-address': pa, 'port': p}
-                            for h, pa, p in host_set]
+            service['hosts'] = [
+                {'hostname': h, 'private-address': pa, 'port': p}
+                for h, pa, p in host_set
+            ]
 
         ret = [s for s in services.values() if s['hosts']]
         return ret
