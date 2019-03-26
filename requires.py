@@ -69,7 +69,7 @@ class HttpRequires(Endpoint):
 
             service['hosts'] = [
                 {'hostname': h, 'private-address': pa, 'port': p}
-                for h, pa, p in host_set
+                for h, pa, p in sorted(host_set)
             ]
 
         ret = [s for s in services.values() if s['hosts']]
